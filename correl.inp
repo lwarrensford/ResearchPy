@@ -1,0 +1,53 @@
+* Correlation function analysis - Luke Warrensford
+*
+
+dimension chsize 1500000
+
+prnlev 5
+wrnlev 5
+bomlev -2
+
+! Read topology and parameter files
+read rtf card name ../../top_all36_prot.rtf
+read rtf card append name ../../top_all36_cgenff.rtf
+read rtf card append name ../../ligand_prep/a-bad-badres-h-stu.rtf
+
+wrnlev 1
+read para card flex name ../../par_all36_prot.prm
+read para card append flex name ../../par_all36_cgenff.prm
+read para card append flex name ../../ligand_prep/a-bad-badres-h-stu.prm
+wrnlev 5
+
+stream ../../toppar_water_ions.str
+stream ../../ligand_prep/stu.str
+
+! Read in the protein coordinate file that has activesite at the origin
+open unit 99 read form name sgld_charmmsp-stu1_final.psf
+read PSF card unit 99
+close unit 99
+
+open unit 88 read card name sgld_charmmsp-stu1_final.cor
+read COOR card unit 88
+close unit 88
+
+open unit 1 read file name sgld_stu1_final.dcd
+TRAJ QUER UNIT 1
+
+CORREL MAXSERIES 1 MAXTIMESTEPS 500 MAXATOMS 50
+ENTER STUA ATOM R sele segid STU end
+TRAJECTORY FIRSTU 1 NUNIT 5 BEGIN 40 STOP 2520 SKIP 40
+MANTIME STUA DAVER
+WRITE STUA UNIT 20 DUMB TIME
+* title
+
+WRITE STUA CARD UNIT 10
+* file containing the time series
+
+CORFUN STUA STUA  FFT NLTC P0
+WRITE CORREL UNIT 21 DUMB TIME
+* title
+
+WRITE CORREL FILE UNIT 11
+* binary correlation function
+
+stop
